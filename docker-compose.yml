@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=mysecret
+      - DB_HOST=db  # Corrected DB_HOST to use service name 'db'
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=grocery
+    depends_on:
+      - db
+    # Optional health check for database readiness
+    healthcheck:
+      test: ["CMD", "nc", "-z", "db", "5432"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+      timeout: 5s
+
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: grocery
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
